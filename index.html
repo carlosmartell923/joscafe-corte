@@ -371,19 +371,34 @@ function App(){
   const totalOtrosM=morning.otrosIngresos.reduce((s,o)=>s+num(o.cantidad),0);
   const efectivoTeoricoM=num(morning.ventaEfectivo)+totalOtrosM-totalGastosCajaM-propinaMananaNeta2;
 
+  const sendToSheets=(params)=>new Promise(resolve=>{
+    const url=SCRIPT_URL+"?"+Object.entries(params).map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v??"")).join("&");
+    const img=new Image();
+    img.onload=img.onerror=()=>resolve();
+    img.src=url;
+    setTimeout(resolve,5000);
+  });
+
   const handleSendMorning=async()=>{
     try{
-      await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({
-        tipo:"manana",fecha:morning.fecha||new Date().toLocaleDateString("es-MX"),
-        barista:morning.barista,horaCierre:morning.hora,
-        ventaEfectivo:num(morning.ventaEfectivo),ventaTarjeta:num(morning.ventaTarjeta),transferencias:0,
-        propinaTarjeta:num(morning.propinaTarjeta),propinaNeta:propinaMananaNeta2,
-        otrosIngresos:totalOtrosM,gastosCaja:totalGastosCajaM,gastosCartera:totalGastosCarteraM,
+      await sendToSheets({
+        tipo:"manana",
+        fecha:morning.fecha||new Date().toLocaleDateString("es-MX"),
+        barista:morning.barista,
+        horaCierre:morning.hora,
+        ventaEfectivo:num(morning.ventaEfectivo),
+        ventaTarjeta:num(morning.ventaTarjeta),
+        transferencias:0,
+        propinaTarjeta:num(morning.propinaTarjeta),
+        propinaNeta:propinaMananaNeta2,
+        otrosIngresos:totalOtrosM,
+        gastosCaja:totalGastosCajaM,
+        gastosCartera:totalGastosCarteraM,
         efectivoTeorico:efectivoTeoricoM,
         efectivoReal:morning.efectivoReal!==""?num(morning.efectivoReal):"",
         diferencia:morning.efectivoReal!==""?num(morning.efectivoReal)-efectivoTeoricoM:"",
         notas:morning.notas,
-      })});
+      });
     }catch(err){console.error(err);}
     setMorningConfirmed(true);
   };
@@ -391,16 +406,25 @@ function App(){
   const handleSendNight=async()=>{
     setSubmittingNight(true);
     try{
-      await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({
-        tipo:"cierre",fecha:night.fecha,barista:night.barista,
-        ventaEfectivo:num(night.ventaEfectivo),ventaTarjeta:num(night.ventaTarjeta),transferencias:num(night.transferencias),
-        propinasTerminal:propinaTotalTerminal,propinaTurnoManana:propinaMananaNeta,propinaTurnoTarde:propinaNocheNeta,
-        otrosIngresos:totalOtrosN,gastosCaja:totalGastosCajaN,gastosCartera:totalGastosCarteraN,
+      await sendToSheets({
+        tipo:"cierre",
+        fecha:night.fecha,
+        barista:night.barista,
+        ventaEfectivo:num(night.ventaEfectivo),
+        ventaTarjeta:num(night.ventaTarjeta),
+        transferencias:num(night.transferencias),
+        propinasTerminal:propinaTotalTerminal,
+        propinaTurnoManana:propinaMananaNeta,
+        propinaTurnoTarde:propinaNocheNeta,
+        otrosIngresos:totalOtrosN,
+        gastosCaja:totalGastosCajaN,
+        gastosCartera:totalGastosCarteraN,
         totalPropinasPagadas:totalPropinaEfectivo,
-        efectivoTeorico,efectivoReal:num(night.efectivoReal),
+        efectivoTeorico,
+        efectivoReal:num(night.efectivoReal),
         diferencia:num(night.efectivoReal)-efectivoTeorico,
         notas:night.notas,
-      })});
+      });
     }catch(err){console.error(err);}
     setSubmittingNight(false);
     setNightConfirmed(true);
