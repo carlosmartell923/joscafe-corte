@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,11 +7,13 @@
 <title>Jos Café — Corte de Caja</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Arial,sans-serif;background:#fdf6ec;-webkit-tap-highlight-color:transparent;}
 input,select,textarea,button{font-family:Arial,sans-serif;}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.joscafe{font-family:'Great Vibes',cursive;}
 </style>
 </head>
 <body>
@@ -30,7 +33,7 @@ const DEFAULT_BARISTAS=["Fernanda","Tania","Otro"];
 const flr=n=>Math.floor(n);
 const num=v=>{const n=parseFloat(String(v).replace(/,/g,""));return isNaN(n)?0:n;};
 const fmt=n=>new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",minimumFractionDigits:0,maximumFractionDigits:0}).format(flr(n)||0);
-const defaultMorning=()=>({barista:DEFAULT_BARISTAS[0],hora:"",ventaEfectivo:"",ventaTarjeta:"",propinaTarjeta:"",otrosIngresos:[],gastos:[],efectivoReal:"",notas:""});
+const defaultMorning=()=>({barista:DEFAULT_BARISTAS[0],hora:"",ventaEfectivo:"",ventaTarjeta:"",transferencias:"",propinaTarjeta:"",otrosIngresos:[],gastos:[],efectivoReal:"",notas:""});
 const defaultNight=()=>({barista:DEFAULT_BARISTAS[0],fecha:new Date().toISOString().split("T")[0],ventaEfectivo:"",ventaTarjeta:"",transferencias:"",propinaTarjeta:"",gastos:[],otrosIngresos:[],efectivoReal:"",notas:""});
 
 // ── Style helpers ─────────────────────────────────────────────────────────────
@@ -388,7 +391,7 @@ function App(){
         horaCierre:morning.hora,
         ventaEfectivo:num(morning.ventaEfectivo),
         ventaTarjeta:num(morning.ventaTarjeta),
-        transferencias:0,
+        transferencias:num(morning.transferencias),
         propinaTarjeta:num(morning.propinaTarjeta),
         propinaNeta:propinaMananaNeta2,
         otrosIngresos:totalOtrosM,
@@ -438,7 +441,7 @@ function App(){
     showInfo&&h(InfoModal,{onClose:()=>setShowInfo(false)}),
     h("div",{style:{textAlign:"center",marginBottom:40}},
       h("div",{style:{fontSize:40,marginBottom:12}},"☕"),
-      h("h1",{style:{margin:0,fontSize:22,fontWeight:900,color:"#2c1f0e"}},"Jos Café"),
+      h("h1",{style:{margin:0,fontSize:34,fontWeight:400,color:"#2c1f0e"},className:"joscafe"},"Jos Café"),
       h("p",{style:{margin:"6px 0 0",fontSize:12,color:"#8a7560",letterSpacing:"0.08em",textTransform:"uppercase",fontWeight:600}},"Corte de Caja")
     ),
     h("div",{style:{width:"100%",maxWidth:340}},
@@ -503,7 +506,8 @@ function App(){
         ),
         h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:2}},h(Label,null,"Ventas del turno"),h(HelpIcon,null)),
         h(MoneyInput,{hint:"Efectivo",value:morning.ventaEfectivo,onChange:v=>setM({...morning,ventaEfectivo:v})}),
-        h(MoneyInput,{hint:"Tarjeta",value:morning.ventaTarjeta,onChange:v=>setM({...morning,ventaTarjeta:v})})
+        h(MoneyInput,{hint:"Tarjeta",value:morning.ventaTarjeta,onChange:v=>setM({...morning,ventaTarjeta:v})}),
+        h(MoneyInput,{hint:"Transferencias",value:morning.transferencias||"",onChange:v=>setM({...morning,transferencias:v})})
       ),
       h(Card,null,
         h(SectionHeader,{icon:"💳",title:"Propinas en tarjeta",accent:"#6a7fc9"}),
