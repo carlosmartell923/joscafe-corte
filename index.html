@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -374,19 +375,14 @@ function App(){
   const efectivoTeoricoM=num(morning.ventaEfectivo)+totalOtrosM-totalGastosCajaM-propinaMananaNeta2;
 
   const sendToSheets=(params)=>new Promise(resolve=>{
-    const url=SCRIPT_URL+"?"+Object.entries(params).map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v??"")).join("&");
-    const iframe=document.createElement("iframe");
-    iframe.style.display="none";
-    iframe.name="submit_frame_"+Date.now();
-    document.body.appendChild(iframe);
-    const form=document.createElement("form");
-    form.method="GET";
-    form.action=url;
-    form.target=iframe.name;
-    document.body.appendChild(form);
-    iframe.onload=()=>{setTimeout(()=>{iframe.remove();form.remove();resolve();},500);};
-    form.submit();
-    setTimeout(()=>{iframe.remove();form.remove();resolve();},8000);
+    const callbackName="cb_"+Date.now();
+    const url=SCRIPT_URL+"?callback="+callbackName+"&"+Object.entries(params).map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v??"")).join("&");
+    window[callbackName]=()=>{delete window[callbackName];script.remove();resolve();};
+    const script=document.createElement("script");
+    script.src=url;
+    script.onerror=()=>{delete window[callbackName];script.remove();resolve();};
+    document.head.appendChild(script);
+    setTimeout(()=>{delete window[callbackName];script.remove();resolve();},8000);
   });
 
   const handleSendMorning=async()=>{
