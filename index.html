@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -375,14 +374,12 @@ function App(){
   const efectivoTeoricoM=num(morning.ventaEfectivo)+totalOtrosM-totalGastosCajaM-propinaMananaNeta2;
 
   const sendToSheets=(params)=>new Promise(resolve=>{
-    const callbackName="cb_"+Date.now();
-    const url=SCRIPT_URL+"?callback="+callbackName+"&"+Object.entries(params).map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v??"")).join("&");
-    window[callbackName]=()=>{delete window[callbackName];script.remove();resolve();};
-    const script=document.createElement("script");
-    script.src=url;
-    script.onerror=()=>{delete window[callbackName];script.remove();resolve();};
-    document.head.appendChild(script);
-    setTimeout(()=>{delete window[callbackName];script.remove();resolve();},8000);
+    fetch(SCRIPT_URL,{
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(params)
+    }).then(()=>resolve()).catch(()=>resolve());
+    setTimeout(resolve,8000);
   });
 
   const handleSendMorning=async()=>{
